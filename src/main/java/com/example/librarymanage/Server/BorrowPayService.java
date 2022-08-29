@@ -68,7 +68,7 @@ public class BorrowPayService {
             return borrowPayDTO;
         }
     }
-    public BorrowPay findByBorrowpayid(String borrowPayID)
+    public BorrowPay findByBorrowpayid(Integer borrowPayID)
     {
         return borrowPayRepository.findByBorrowpayid(borrowPayID);
     }
@@ -166,5 +166,11 @@ public class BorrowPayService {
     List<BorrowPay> findAllByBookid(String bookID)
     {
         return borrowPayRepository.findAllByBookid(bookID);
+    }
+    public void delete(BorrowPay borrowPay)
+    {
+        System.out.println(borrowPayRepository.findByBorrowpayid(borrowPay.getBorrowpayid()));
+        //System.out.println(borrowPay.getBorrowpayid());
+        borrowPayRepository.delete(borrowPay);
     }
 }

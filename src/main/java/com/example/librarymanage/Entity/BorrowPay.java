@@ -18,5 +18,5 @@ public class BorrowPay {
     private String bookid;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate borrowpaydate;
-    private boolean status;
+    private Integer status;
 }
