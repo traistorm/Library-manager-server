@@ -1,9 +1,6 @@
 package com.example.librarymanage.Controller;
 
-import com.example.librarymanage.DTO.BookDTO;
-import com.example.librarymanage.DTO.BorrowPayDTO;
-import com.example.librarymanage.DTO.LibraryCardDTO;
-import com.example.librarymanage.DTO.StaffDTO;
+import com.example.librarymanage.DTO.*;
 import com.example.librarymanage.Entity.*;
 import com.example.librarymanage.Server.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,23 +34,38 @@ public class RestAPI {
     UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam(required = false, name = "username") String username,
-                                        @RequestParam(required = false, name = "password") String password,
-                                        @RequestParam(required = false, name = "token") String token) {
+    public ResponseEntity<UserDTO> login(@RequestParam(required = false, name = "username") String username,
+                                         @RequestParam(required = false, name = "password") String password,
+                                         @RequestParam(required = false, name = "token") String token) {
         //int a = 1;
         if ((username != null && password != null) || token != null) {
-            String result = userService.login(username, password, token);
-            return switch (result) {
-                case "Token is valid" -> new ResponseEntity<>("Login success", HttpStatus.OK);
-                case "Token timeout" -> new ResponseEntity<>("Login failed", HttpStatus.UNAUTHORIZED);
+            UserDTO userDTO = userService.login(username, password, token);
+            return switch (userDTO.getResult()) {
+                case "Token timeout" -> new ResponseEntity<>(userDTO, HttpStatus.UNAUTHORIZED);
                 case "Token is invalid", "Password is incorrect", "User not found" ->
-                        new ResponseEntity<>("Login failed", HttpStatus.BAD_REQUEST);
-                default -> new ResponseEntity<>(result, HttpStatus.OK); // Result is token
+                        new ResponseEntity<>(userDTO, HttpStatus.BAD_REQUEST);
+                default -> new ResponseEntity<>(userDTO, HttpStatus.OK); // Result is token
 
             };
         } else {
-            return new ResponseEntity<>("", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 
+        }
+
+    }
+    @GetMapping("/login/role")
+    public ResponseEntity<String> getUser(@RequestParam(required = false, name = "username") String username,
+                                        @RequestParam(required = false, name = "password") String password,
+                                        @RequestParam(required = false, name = "token") String token) {
+        //int a = 1;
+        try
+        {
+            return new ResponseEntity<>(userService.getTokenRole(token), HttpStatus.BAD_REQUEST);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -364,7 +376,7 @@ public class RestAPI {
     public ResponseEntity<String> getStaffList(Staff staff, @RequestParam(name = "token", required = false) String token,
                                                @RequestParam(name = "staffidold", required = false) String staffIDOld) {
 
-        String result = userService.login(null, null, token);
+        String result = userService.login(null, null, token).getResult();
         System.out.println(result);
         if (result.equals("Token is valid")) {
             System.out.println(token);
@@ -378,7 +390,7 @@ public class RestAPI {
 
     @PostMapping("/staffs")
     public ResponseEntity<String> getStaffList(Staff staff, @RequestParam(name = "token", required = false) String token) {
-        String result = userService.login(null, null, token);
+        String result = userService.login(null, null, token).getResult();
         System.out.println(staff);
         if (result.equals("Token is valid")) {
             System.out.println(token);

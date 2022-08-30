@@ -1,5 +1,6 @@
 package com.example.librarymanage.Server;
 
+import com.example.librarymanage.DTO.UserDTO;
 import com.example.librarymanage.Entity.Token;
 import com.example.librarymanage.Entity.User;
 import com.example.librarymanage.Repository.UserRepository;
@@ -29,8 +30,9 @@ public class UserService {
     {
         return userRepository.findByUserid(userID);
     }
-    public String login(String username, String password, String tokenValue)
+    public UserDTO login(String username, String password, String tokenValue)
     {
+        UserDTO userDTO = new UserDTO();
         // Generate token
         if (tokenValue != null)
         {
@@ -40,18 +42,23 @@ public class UserService {
                 Date date = new Date();
                 if ((Long.parseLong(token.getInitializationtime()) + 60 * 60 * 1000) > date.getTime())
                 {
+                    userDTO.setToken(token);
+                    userDTO.setResult("Token is valid");
                     //tokenService.delete(token);
-                    return "Token is valid";
+                    return userDTO;
                 }
                 else // Token timeout
                 {
                     tokenService.delete(token); // Delete token from database
-                    return "Token timeout";
+                    userDTO.setResult("Token timeout");
+                    return userDTO;
                 }
             }
             else
             {
-                return "Token is invalid";
+                userDTO.setToken(token);
+                userDTO.setResult("Token is invalid");
+                return userDTO;
             }
 
         }
@@ -73,18 +80,23 @@ public class UserService {
                     Date date = new Date();
                     token.setTokenvalue(Base64.getUrlEncoder().encodeToString(randomBytes));
                     token.setInitializationtime(String.valueOf(date.getTime()));
+                    token.setRole(user.getRole());
                     tokenService.save(token);
-                    return token.getTokenvalue(); // Return token
+                    userDTO.setToken(token);
+                    userDTO.setUser(user);
+                    return userDTO; // Return token
                 }
                 else
                 {
-                    return "Password is incorrect";
+                    userDTO.setResult("Password is incorrect");
+                    return userDTO;
                 }
 
             }
             else
             {
-                return "User not found";
+                userDTO.setResult("User not found");
+                return userDTO;
             }
         }
 
@@ -100,5 +112,14 @@ public class UserService {
             tokenService.delete(tokenFound);
         }
         return true;
+    }
+    public String getTokenRole(String token)
+    {
+        Token tokenFound = tokenService.findByTokenvalue(token);
+        if (tokenFound != null)
+        {
+            return tokenFound.getRole();
+        }
+        return null;
     }
 }
