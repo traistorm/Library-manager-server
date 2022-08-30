@@ -57,6 +57,24 @@ public class RestAPI {
         }
 
     }
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestParam(required = false, name = "username") String username,
+                                        @RequestParam(required = false, name = "password") String password,
+                                        @RequestParam(required = false, name = "token") String token) {
+        //int a = 1;
+       try
+       {
+
+           userService.logout(token); // Delete token
+           return new ResponseEntity<>("Logout success", HttpStatus.OK);
+       }
+       catch (Exception e)
+       {
+           e.printStackTrace();
+           return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+       }
+
+    }
 
     @GetMapping("/users")
     public List<User> getUserList() {
@@ -248,41 +266,73 @@ public class RestAPI {
 
     @PutMapping("/library-cards")
     public ResponseEntity<LibraryCardDTO> saveLibraryCard(LibraryCard libraryCard,
-                                                          @RequestParam(name = "test") String test,
-                                                          @RequestParam(name = "librarycardidold") String libraryCardIDOld) {
-        System.out.println(test);
-        libraryCardService.update(libraryCard, libraryCardIDOld);
-        return new ResponseEntity<>(null, HttpStatus.OK);
+                                                          @RequestParam(name = "librarycardidold") String libraryCardIDOld,
+                                                          @RequestParam(name = "token") String token) {
+        try {
+            if (userService.login(null, null, token).equals("Token is valid")) {
+                libraryCardService.update(libraryCard, libraryCardIDOld);
+                return new ResponseEntity<>(null, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(null, HttpStatus.REQUEST_TIMEOUT);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @PostMapping("/library-cards")
-    public ResponseEntity<LibraryCardDTO> addLibraryCard(LibraryCard libraryCard) {
+    public ResponseEntity<String> addLibraryCard(LibraryCard libraryCard,
+                                                         @RequestParam(name = "token") String token) {
         System.out.println(libraryCard);
-        if (libraryCardService.findByLibrarycardid(libraryCard.getLibrarycardid()) == null) {
-            libraryCardService.save(libraryCard);
+        try {
+            if (userService.login(null, null, token).equals("Token is valid")) {
+                if (libraryCardService.findByLibrarycardid(libraryCard.getLibrarycardid()) == null) {
+                    libraryCardService.save(libraryCard);
+                    return new ResponseEntity<>(null, HttpStatus.OK);
+                }
+                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            } else {
+                return new ResponseEntity<>(null, HttpStatus.REQUEST_TIMEOUT);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @DeleteMapping("/library-cards")
-    public ResponseEntity<LibraryCardDTO> deleteLibraryCard(@RequestParam(name = "librarycardid", required = false) String libraryCardID) {
+    public ResponseEntity<LibraryCardDTO> deleteLibraryCard(@RequestParam(name = "librarycardid", required = false) String libraryCardID,
+                                                            @RequestParam(name = "token") String token) {
         //System.out.println(test);
         //libraryCardService.update(libraryCard, libraryCardIDOld);
-        libraryCardService.delete(libraryCardID);
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        try {
+            if (userService.login(null, null, token).equals("Token is valid")) {
+                libraryCardService.delete(libraryCardID);
+                return new ResponseEntity<>(null, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(null, HttpStatus.REQUEST_TIMEOUT);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/library-cards/search")
     public ResponseEntity<LibraryCardDTO> searchLibraryCard(@RequestParam(name = "librarycardid", required = false) String libraryCardID,
                                                             @RequestParam(name = "librarycardname", required = false) String libraryCardName,
                                                             @RequestParam(name = "page", required = false) Integer page,
-                                                            @RequestParam(name = "itemperpage", required = false) Integer itemPerPage) {
+                                                            @RequestParam(name = "itemperpage", required = false) Integer itemPerPage,
+                                                            @RequestParam(name = "token") String token) {
         System.out.println(libraryCardID + " " + libraryCardName);
         if (libraryCardID != null && libraryCardName != null) {
-            if (!libraryCardID.equals("")) {
-                return new ResponseEntity<>(libraryCardService.findAllByLibrarycardidAndName(libraryCardID, libraryCardName, page, itemPerPage), HttpStatus.OK);
-            } else {
+            if (!libraryCardID.equals("") && libraryCardName.equals("")) {
+                return new ResponseEntity<>(libraryCardService.findByLibrarycardidContaining(libraryCardID, page, itemPerPage), HttpStatus.OK);
+            } else if (libraryCardID.equals("") && !libraryCardName.equals("")) {
                 return new ResponseEntity<>(libraryCardService.findAllByName(libraryCardName, page, itemPerPage), HttpStatus.OK);
+            }
+            else
+            {
+                return new ResponseEntity<>(libraryCardService.findAllByLibrarycardidAndName(libraryCardID, libraryCardName, page, itemPerPage), HttpStatus.OK);
             }
         }
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -446,31 +496,38 @@ public class RestAPI {
 
     @PostMapping("/borrow-pay/search")
     @ResponseBody
-    public ResponseEntity<BorrowPayDTO> searchBorrowPay(@RequestParam(name = "borrowpayid", required = false) String borrowPayID,
+    public ResponseEntity<BorrowPayDTO> searchBorrowPay(@RequestParam(name = "borrowpayid", required = false) Integer borrowPayID,
                                                         @RequestParam(name = "borrowpayname", required = false) String borrowPayName,
                                                         @RequestParam(name = "page", required = false) Integer page,
-                                                        @RequestParam(name = "itemperpage", required = false) Integer itemPerPage) {
-        if (borrowPayID != null && borrowPayName != null) {
-            //System.out.println(bookIDString + bookName);
-            try {
-                if (!borrowPayID.equals("")) {
-                    return new ResponseEntity<>(borrowPayService.findAllByBorrowPayIDAndBorrowPayName(borrowPayID, borrowPayName, page, itemPerPage), HttpStatus.OK);
-                } else {
+                                                        @RequestParam(name = "itemperpage", required = false) Integer itemPerPage,
+                                                        @RequestParam(name = "token") String token) {
+        try
+        {
+            if (userService.login(null, null, token).equals("Token is valid")) {
+                if (!borrowPayName.equals("")) {
                     return new ResponseEntity<>(borrowPayService.findAllByBorrowPayName(borrowPayName, page, itemPerPage), HttpStatus.OK);
-                }
-            } catch (Exception e) {
-                System.out.println(e);
-                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+
+                } else {
+                    System.out.println("Check 3");
+                    return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);                }
             }
-        } else {
+            else
+            {
+                return new ResponseEntity<>(null, HttpStatus.REQUEST_TIMEOUT);
+            }
+        }
+        catch (Exception e)
+        {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
+
+
     }
 
     @GetMapping("/borrow-pay/{id}")
     @ResponseBody
     public ResponseEntity<BorrowPay> getBookPayList(@PathVariable(name = "id", required = false) Integer id) {
-        return new ResponseEntity<>(borrowPayService.findByBorrowpayid(id), HttpStatus.OK);
+        return new ResponseEntity<>(borrowPayService.findByBorrowPayid(id), HttpStatus.OK);
     }
 
     @DeleteMapping("/borrow-pay")
@@ -480,7 +537,7 @@ public class RestAPI {
         try {
             if (userService.login(null, null, token).equals("Token is valid")) {
                 System.out.println("ID : " + borrowPayID);
-                borrowPayService.delete(borrowPayService.findByBorrowpayid(borrowPayID));
+                borrowPayService.delete(borrowPayService.findByBorrowPayid(borrowPayID));
                 return new ResponseEntity<>("Xoá thành công", HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(null, HttpStatus.REQUEST_TIMEOUT);

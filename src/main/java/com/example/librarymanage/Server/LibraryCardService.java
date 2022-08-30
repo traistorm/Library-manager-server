@@ -56,6 +56,34 @@ public class LibraryCardService {
     {
         return libraryCardRepository.findByLibrarycardid(libraryCardID);
     }
+    public LibraryCardDTO findByLibrarycardidContaining(String libraryCardID, Integer page, Integer itemPerPage)
+    {
+        if (page != null && itemPerPage != null)
+        {
+            LibraryCardDTO libraryCardDTO =  new LibraryCardDTO();
+            List<LibraryCard> libraryCardList = libraryCardRepository.findAllByLibrarycardidContaining(libraryCardID);
+            libraryCardDTO.setMaxPage((int)Math.ceil((double)libraryCardList.size() / itemPerPage));
+            System.out.println(libraryCardList);
+            if ((page - 1) * itemPerPage + itemPerPage > libraryCardList.size())
+            {
+                libraryCardList = libraryCardList.subList((page - 1) * itemPerPage, libraryCardList.size());
+            }
+            else
+            {
+                libraryCardList = libraryCardList.subList((page - 1) * itemPerPage, (page - 1) * itemPerPage + itemPerPage);
+            }
+
+
+            libraryCardDTO.setLibraryCardList(libraryCardList);
+            //System.out.println(libraryCardList.size());
+            return libraryCardDTO;
+        }
+        else
+        {
+
+            return null;
+        }
+    }
     public void save(LibraryCard libraryCard)
     {
         //LibraryCard libraryCardFound = libraryCardRepository.findByLibrarycardid(libraryCard)

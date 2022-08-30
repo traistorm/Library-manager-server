@@ -89,4 +89,16 @@ public class UserService {
         }
 
     }
+    public boolean logout(String token)
+    {
+        System.out.println(token);
+        Token tokenFound = tokenService.findByTokenvalue(token);
+        System.out.println("Token found" + tokenFound);
+        if (token != null)
+        {
+            System.out.println("Delete");
+            tokenService.delete(tokenFound);
+        }
+        return true;
+    }
 }

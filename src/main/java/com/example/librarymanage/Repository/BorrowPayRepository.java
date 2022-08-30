@@ -8,6 +8,7 @@ import java.util.List;
 
 @Repository
 public interface BorrowPayRepository extends JpaRepository<BorrowPay, Integer> {
+    List<BorrowPay> findByBorrowpayidContaining(Integer borrowPayID);
     BorrowPay findByBorrowpayid(Integer borrowPayID);
     List<BorrowPay> findAllByLibrarycardid(String libraryCardID);
     List<BorrowPay> findByLibrarycardid(String libraryCardID);

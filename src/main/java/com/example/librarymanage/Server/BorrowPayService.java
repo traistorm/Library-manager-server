@@ -68,9 +68,27 @@ public class BorrowPayService {
             return borrowPayDTO;
         }
     }
-    public BorrowPay findByBorrowpayid(Integer borrowPayID)
+    public BorrowPayDTO findByBorrowpayid(Integer borrowPayID, Integer page, Integer itemPerPage)
     {
-        return borrowPayRepository.findByBorrowpayid(borrowPayID);
+        System.out.println("Check");
+        BorrowPayDTO borrowPayDTO = new BorrowPayDTO();
+        BorrowPay borrowPay = borrowPayRepository.findByBorrowpayid(borrowPayID);
+        System.out.println("Check");
+        borrowPayDTO.setMaxPage(1);
+        List<LibraryCard> libraryCardList = new ArrayList<>();
+        List<Staff> staffList = new ArrayList<>();
+
+        LibraryCard libraryCard = libraryCardService.findByLibrarycardid(borrowPay.getLibrarycardid());
+        Staff staff = staffService.findByStaffid(borrowPay.getStaffid());
+        libraryCardList.add(libraryCard);
+        staffList.add(staff);
+
+        borrowPayDTO.setLibraryCardList(libraryCardList);
+        borrowPayDTO.setStaffList(staffList);
+        List<BorrowPay> borrowPayList = new ArrayList<>();
+        borrowPayList.add(borrowPay);
+        borrowPayDTO.setBorrowPayList(borrowPayList);
+        return borrowPayDTO;
     }
     public List<BorrowPay> findAllByLibrarycardid(String libraryCardID)
     {
@@ -122,7 +140,7 @@ public class BorrowPayService {
         borrowPayDTO.setLibraryCardList(libraryCardList);
         return borrowPayDTO;
     }
-    public BorrowPayDTO findAllByBorrowPayIDAndBorrowPayName(String borrowPayID, String borrowPayName, Integer page, Integer itemPerPage)
+    public BorrowPayDTO findAllByBorrowPayIDAndBorrowPayName(Integer borrowPayID, String borrowPayName, Integer page, Integer itemPerPage)
     {
         BorrowPayDTO borrowPayDTO = new BorrowPayDTO();
 
@@ -134,7 +152,7 @@ public class BorrowPayService {
             borrowPayList.addAll(borrowPayRepository.findByLibrarycardid(libraryCard.getLibrarycardid()));
         }
         System.out.println(borrowPayList);
-        borrowPayList.removeIf(borrowPay -> !borrowPay.getBorrowpayid().toString().contains(borrowPayID));
+        borrowPayList.removeIf(borrowPay -> !borrowPay.getBorrowpayid().toString().contains(borrowPayID.toString()));
         System.out.println(borrowPayList);
         for (BorrowPay borrowPay : borrowPayList)
         {
@@ -172,5 +190,9 @@ public class BorrowPayService {
         System.out.println(borrowPayRepository.findByBorrowpayid(borrowPay.getBorrowpayid()));
         //System.out.println(borrowPay.getBorrowpayid());
         borrowPayRepository.delete(borrowPay);
+    }
+    public BorrowPay findByBorrowPayid(Integer borrowPayID)
+    {
+        return borrowPayRepository.findByBorrowpayid(borrowPayID);
     }
 }

@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface LibraryCardRepository extends JpaRepository<LibraryCard, Integer> {
     LibraryCard findByLibrarycardid(String libraryCardID);
+    List<LibraryCard> findAllByLibrarycardidContaining(String libraryCardID);
     List<LibraryCard> findAllByLibrarycardidContainingAndNameContaining(String libraryCardID, String name);
     List<LibraryCard> findAllByNameContaining(String name);
 
