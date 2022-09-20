@@ -12,4 +12,5 @@ public interface BookAuthorRepository extends JpaRepository<BookAuthor, Integer>
     BookAuthor findByBookidContainingAndAuthoridContaining(String bookID, String authorID);
     List<BookAuthor> findAllByBookidContaining(String bookid);
     List<BookAuthor> findAllByBookid(String bookID);
+    List<BookAuthor> findAllByAuthorid(String authorID);
 }

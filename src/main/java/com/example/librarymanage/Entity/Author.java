@@ -1,6 +1,7 @@
 package com.example.librarymanage.Entity;
 
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ public class Author {
     @Id
     private String authorid;
     private String authorname;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateofbirth;
 
 

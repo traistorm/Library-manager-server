@@ -1,8 +1,10 @@
 package com.example.librarymanage.Entity;
 
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -14,4 +16,6 @@ public class User {
     private String username;
     private String password;
     private String role;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate datecreated;
 }

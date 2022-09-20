@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Objects;
@@ -154,11 +155,18 @@ public class BookService {
         }
 
     }
+    @Transactional
     public void save(Book book)
     {
         bookRepository.save(book);
     }
-    public void delete(List<Book> bookList)
+    @Transactional
+    public void saveAll(List<Book> bookList)
+    {
+        bookRepository.saveAll(bookList);
+    }
+    @Transactional
+    public void deleteAll(List<Book> bookList)
     {
         bookRepository.deleteAll(bookList);
     }
@@ -230,5 +238,9 @@ public class BookService {
             e.printStackTrace();
             return false;
         }
+    }
+    public List<Book> findAllByPublishingcompanyid(String publishingCompanyID)
+    {
+        return bookRepository.findAllByPublishingcompanyid(publishingCompanyID);
     }
 }

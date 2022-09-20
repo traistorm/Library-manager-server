@@ -16,4 +16,5 @@ public class Token {
     private String tokenvalue;
     private String initializationtime;
     private String role;
+    private Integer userid;
 }

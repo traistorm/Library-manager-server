@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,6 +95,7 @@ public class BorrowPayService {
     {
         return borrowPayRepository.findAllByLibrarycardid(libraryCardID);
     }
+    @Transactional
     public void delete(List<BorrowPay> borrowPayList)
     {
         borrowPayRepository.deleteAll(borrowPayList);
@@ -185,6 +187,7 @@ public class BorrowPayService {
     {
         return borrowPayRepository.findAllByBookid(bookID);
     }
+    @Transactional
     public void delete(BorrowPay borrowPay)
     {
         System.out.println(borrowPayRepository.findByBorrowpayid(borrowPay.getBorrowpayid()));
