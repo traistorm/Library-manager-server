@@ -37,7 +37,9 @@ public class BookAuthorService {
     }
     public void delete(String bookID, String authorID)
     {
-        BookAuthor bookAuthor = new BookAuthor(bookID, authorID);
+        BookAuthor bookAuthor = new BookAuthor();
+        bookAuthor.setBookid(bookID);
+        bookAuthor.setAuthorid(authorID);
         //System.out.println(bookAuthor.getBookid());
         bookAuthorRepository.delete(bookAuthor);
     }
